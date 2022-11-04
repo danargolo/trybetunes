@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { getUser } from '../services/userAPI';
 import Loading from './Loading';
 
@@ -30,6 +31,26 @@ class Header extends React.Component {
         >
           { `Seja bem-vindo ${name}.` }
         </span>
+        <nav>
+          <Link
+            data-testid="link-to-search"
+            to="/search"
+          >
+            Pesquisa
+          </Link>
+          <Link
+            data-testid="link-to-favorites"
+            to="/favorites"
+          >
+            Favoritos
+          </Link>
+          <Link
+            data-testid="link-to-profile"
+            to="/profile"
+          >
+            Perfil
+          </Link>
+        </nav>
       </header>
 
     );
