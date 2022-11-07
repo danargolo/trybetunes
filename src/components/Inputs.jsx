@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 class Inputs extends React.Component {
   render() {
-    const { search, onInputChange, isDisabled, searchArtist } = this.props;
+    const { search, handleChange, isDisabled, searchArtist } = this.props;
 
     return (
       <form>
@@ -13,7 +13,7 @@ class Inputs extends React.Component {
           type="search"
           placeholder="Search..."
           value={ search }
-          onChange={ onInputChange }
+          onChange={ handleChange }
         />
         <button
           data-testid="search-artist-button"
@@ -31,7 +31,7 @@ class Inputs extends React.Component {
 Inputs.propTypes = {
   search: PropTypes.string.isRequired,
   isDisabled: PropTypes.bool.isRequired,
-  onInputChange: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
   searchArtist: PropTypes.func.isRequired,
 };
 

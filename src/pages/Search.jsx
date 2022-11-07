@@ -2,6 +2,7 @@ import React from 'react';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import Inputs from '../components/Inputs';
+import ResultString from '../components/ResultString';
 import ArtistResult from '../components/ArtistResult';
 import { searchAlbumsAPI } from '../services/searchAlbumsAPI';
 
@@ -15,7 +16,7 @@ class Search extends React.Component {
     emptyResult: false,
   };
 
-  onInputChange = (event) => {
+  handleChange = (event) => {
     const { name, value } = event.target;
     const minLength = 2;
     this.setState({ [name]: value }, () => (
@@ -25,23 +26,25 @@ class Search extends React.Component {
     ));
   };
 
-  searchArtist = async (event) => {
+  searchArtist = (event) => {
     event.preventDefault();
     const { search } = this.state;
     this.setState({
       search: '',
       loading: true,
+    }, () => {
+      searchAlbumsAPI(search).then(album => {
+        if (album.length < 1) { this.setState({ emptyResult: true }); }
+  
+        this.setState({
+          artist: search,
+          isDisabled: true,
+          loading: false,
+          result: album,
+        });
+      })
     });
-    const result = await searchAlbumsAPI(search);
 
-    if (result.length < 1) { this.setState({ emptyResult: true }); }
-
-    this.setState({
-      isDisabled: true,
-      loading: false,
-      artist: search,
-      result,
-    });
   };
 
   render() {
@@ -49,29 +52,27 @@ class Search extends React.Component {
       result, artist, emptyResult } = this.state;
 
     return (
-      <>
-        <div
-          data-testid="page-search"
-        >
-          <Header />
-          { (loading
-            ? <Loading />
-            : <Inputs
-                search={ search }
-                isDisabled={ isDisabled }
-                onInputChange={ this.onInputChange }
-                searchArtist={ this.searchArtist }
-            />)}
-        </div>
+      <div
+        data-testid="page-search"
+      >
+        <Header />
+        <Inputs
+          search={ search }
+          isDisabled={ isDisabled }
+          handleChange={ this.handleChange }
+          searchArtist={ this.searchArtist }
+        />
+        { loading && <Loading /> }
         { emptyResult && <h2>Nenhum álbum foi encontrado</h2>}
         <h2>{`Resultado de álbuns de: ${artist}`}</h2>
+
         { result.map((album, index) => (
           <ArtistResult
-            key={ index }
+            key={ `${index}-${album.collectionId}` }
             album={ album }
           />
         ))}
-      </>
+      </div>
     );
   }
 }
