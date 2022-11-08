@@ -9,7 +9,6 @@ class ResultString extends React.Component {
       (emptyResult
         ? <h2>Nenhum álbum foi encontrado</h2>
         : <h2>{`Resultado de álbuns de: ${artist}`}</h2>)
-
     );
   }
 }

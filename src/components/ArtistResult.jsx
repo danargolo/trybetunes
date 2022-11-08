@@ -25,6 +25,8 @@ class ArtistResult extends React.Component {
 }
 
 ArtistResult.propTypes = {
+  // artist: PropTypes.string.isRequired,
+  // emptyResult: PropTypes.bool.isRequired,
   album: PropTypes.shape({
     collectionId: PropTypes.number.isRequired,
     artistName: PropTypes.string.isRequired,

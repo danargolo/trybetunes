@@ -4,7 +4,7 @@ import Loading from '../components/Loading';
 import Inputs from '../components/Inputs';
 import ResultString from '../components/ResultString';
 import ArtistResult from '../components/ArtistResult';
-import { searchAlbumsAPI } from '../services/searchAlbumsAPI';
+import searchAlbumsAPI from '../services/searchAlbumsAPI';
 
 class Search extends React.Component {
   state = {
@@ -14,6 +14,7 @@ class Search extends React.Component {
     artist: '',
     result: [],
     emptyResult: false,
+    showResultString: false,
   };
 
   handleChange = (event) => {
@@ -26,46 +27,49 @@ class Search extends React.Component {
     ));
   };
 
-  searchArtist = (event) => {
+  searchArtist = async (event) => {
     event.preventDefault();
     const { search } = this.state;
     this.setState({
       search: '',
       loading: true,
-    }, () => {
-      searchAlbumsAPI(search).then(album => {
-        if (album.length < 1) { this.setState({ emptyResult: true }); }
-  
-        this.setState({
-          artist: search,
-          isDisabled: true,
-          loading: false,
-          result: album,
-        });
-      })
     });
+    const result = await searchAlbumsAPI(search);
 
+    this.setState({
+      artist: search,
+      isDisabled: true,
+      loading: false,
+      result,
+      showResultString: true,
+    }, () => (
+      result.length < 1
+        ? this.setState({ emptyResult: true })
+        : this.setState({ emptyResult: false })
+    ));
   };
 
   render() {
     const { search, isDisabled, loading,
-      result, artist, emptyResult } = this.state;
+      result, artist, emptyResult, showResultString } = this.state;
 
     return (
       <div
         data-testid="page-search"
       >
         <Header />
-        <Inputs
-          search={ search }
-          isDisabled={ isDisabled }
-          handleChange={ this.handleChange }
-          searchArtist={ this.searchArtist }
-        />
         { loading && <Loading /> }
-        { emptyResult && <h2>Nenhum álbum foi encontrado</h2>}
-        <h2>{`Resultado de álbuns de: ${artist}`}</h2>
-
+        { loading
+          || <Inputs
+            search={ search }
+            isDisabled={ isDisabled }
+            handleChange={ this.handleChange }
+            searchArtist={ this.searchArtist }
+          />}
+        { showResultString && <ResultString
+          artist={ artist }
+          emptyResult={ emptyResult }
+        />}
         { result.map((album, index) => (
           <ArtistResult
             key={ `${index}-${album.collectionId}` }
