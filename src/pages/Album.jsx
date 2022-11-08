@@ -3,9 +3,13 @@ import PropTypes from 'prop-types';
 import getMusics from '../services/musicsAPI';
 import Header from '../components/Header';
 import MusicCard from '../components/MusicCard';
+import Loading from '../components/Loading';
+import { addSong } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   state = {
+    loading: false,
+    // check: {},
     album: [],
     musics: [],
   };
@@ -26,13 +30,29 @@ class Album extends React.Component {
     });
   };
 
+  handleCheckbox = async (event) => {
+    this.setState(() => ({
+      loading: true }));
+    // check: {...prev.check, [event.target.id]: event.target.checked}}))
+    const { musics } = this.state;
+    const { id } = event.target;
+    const objMusic = musics.find((music) => +id === +music.trackId);
+    await addSong(objMusic);
+
+    this.setState(() => ({
+      loading: false }));
+    // check: {...prev.check}}))
+  };
+
   render() {
-    const { musics, album } = this.state;
+    const { musics, album, loading } = this.state;
     const { artistName, collectionName, artworkUrl100 } = album;
+    // console.log(musics)
 
     return (
       <>
         <Header />
+        { loading && <Loading />}
         <div>
           <img src={ artworkUrl100 } alt={ collectionName } />
           <h2 data-testid="album-name">
@@ -41,15 +61,17 @@ class Album extends React.Component {
           <h3 data-testid="artist-name">
             { artistName }
           </h3>
+          {musics.map((music, index) => (
+            <MusicCard
+              key={ index }
+              name={ music.trackName }
+              previewUrl={ music.previewUrl }
+              trackId={ music.trackId }
+              handleCheckbox={ this.handleCheckbox }
+              // checked={ checked }
+            />
+          ))}
         </div>
-
-        {musics.map((music, index) => (
-          <MusicCard
-            key={ index }
-            name={ music.trackName }
-            previewUrl={ music.previewUrl }
-          />
-        ))}
       </>
     );
   }
