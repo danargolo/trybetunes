@@ -4,12 +4,12 @@ import getMusics from '../services/musicsAPI';
 import Header from '../components/Header';
 import MusicCard from '../components/MusicCard';
 import Loading from '../components/Loading';
-import { addSong } from '../services/favoriteSongsAPI';
+import { addSong, getFavoriteSongs } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   state = {
     loading: false,
-    // check: {},
+    checked: {},
     album: [],
     musics: [],
   };
@@ -27,13 +27,12 @@ class Album extends React.Component {
     this.setState({
       album,
       musics,
-    });
+    }, this.handleGetFavoriteSongs);
   };
 
   handleCheckbox = async (event) => {
     this.setState(() => ({
       loading: true }));
-    // check: {...prev.check, [event.target.id]: event.target.checked}}))
     const { musics } = this.state;
     const { id } = event.target;
     const objMusic = musics.find((music) => +id === +music.trackId);
@@ -41,19 +40,29 @@ class Album extends React.Component {
 
     this.setState(() => ({
       loading: false }));
-    // check: {...prev.check}}))
+  };
+
+  handleGetFavoriteSongs = async () => {
+    const favoriteSongs = await getFavoriteSongs();
+    const { musics } = this.state;
+
+    const favorites = favoriteSongs.filter((song) => (
+      musics.find((music) => music.trackId === song.trackId)));
+
+    favorites.forEach((fav) => this.setState((prev) => ({
+      checked: { ...prev.checked, [fav.trackId]: true },
+    })));
   };
 
   render() {
-    const { musics, album, loading } = this.state;
+    const { musics, album, loading, checked } = this.state;
     const { artistName, collectionName, artworkUrl100 } = album;
-    // console.log(musics)
 
     return (
       <>
         <Header />
         { loading && <Loading />}
-        <div>
+        <div data-testid="page-album">
           <img src={ artworkUrl100 } alt={ collectionName } />
           <h2 data-testid="album-name">
             { collectionName }
@@ -68,7 +77,7 @@ class Album extends React.Component {
               previewUrl={ music.previewUrl }
               trackId={ music.trackId }
               handleCheckbox={ this.handleCheckbox }
-              // checked={ checked }
+              checked={ checked[music.trackId] }
             />
           ))}
         </div>
